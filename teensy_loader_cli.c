@@ -33,6 +33,8 @@
 #include <string.h>
 #include <unistd.h>
 
+static int soft_reboot_pid = 0x16C0, soft_reboot_vid = 0x0483;
+
 void usage(const char *err)
 {
 	if(err != NULL) fprintf(stderr, "%s\n\n", err);
@@ -310,7 +312,7 @@ int soft_reboot(void)
 {
 	usb_dev_handle *serial_handle = NULL;
 
-	serial_handle = open_usb_device(0x16C0, 0x0483);
+	serial_handle = open_usb_device(soft_reboot_vid, soft_reboot_pid);
 	if (!serial_handle) {
 		char *error = usb_strerror();
 		printf("Error opening USB device: %s\n", error);
@@ -1106,6 +1108,9 @@ void parse_options(int argc, char **argv)
 				if(strcasecmp(name, "help") == 0) usage(NULL);
 				else if(strcasecmp(name, "mcu") == 0) read_mcu(val);
 				else if(strcasecmp(name, "list-mcus") == 0) list_mcus();
+				else if(strcasecmp(name, "device") == 0) {
+					sscanf(val, "%X:%X", &soft_reboot_vid, &soft_reboot_pid);
+				}
 				else {
 					fprintf(stderr, "Unknown option \"%s\"\n\n", arg);
 					usage(NULL);
